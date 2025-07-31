@@ -1,0 +1,34 @@
+services:
+  development:
+    image: sandbox-grpc
+    container_name: sandbox-grpc
+    stdin_open: true
+    tty: true
+    volumes:
+      - type: bind
+        source: ./src
+        target: /home/app
+      - type: bind
+        source: ./seed-data
+        target: /home/seed-data
+      - type: bind
+        source: ../02-db/home/gear.db
+        target: /home/db/gear.db
+    build:
+      context: .
+      dockerfile: Dockerfile
+  api:
+    image: gear-weight-api
+    container_name: gear-weight-api
+    stdin_open: true
+    tty: true
+    volumes:
+      - type: bind
+        source: ./seed-data
+        target: /home/seed-data
+      - type: bind
+        source: ../02-db/home/gear.db
+        target: /home/db/gear.db
+    build:
+      context: ./src
+      dockerfile: Dockerfile_final

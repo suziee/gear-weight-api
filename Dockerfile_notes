@@ -1,0 +1,35 @@
+FROM golang:1.23.3-alpine AS base
+WORKDIR /home/app
+
+RUN apk update \
+    && apk add --no-cache protobuf \
+    # https://stackoverflow.com/questions/50984864/installing-gcc-from-source-on-alpine-based-docker-container-running-protocol-buffers
+    # https://askubuntu.com/questions/231121/how-can-i-check-that-gcc-is-installed-correctly
+    && apk add build-base \
+    && rm -rf /var/cache/apk/* \
+    # https://stackoverflow.com/questions/64447731/protoc-not-found-on-an-alpine-based-docker-container-running-protocol-buffers
+    && go install google.golang.org/protobuf/cmd/protoc-gen-go@latest \
+    && go install google.golang.org/grpc/cmd/protoc-gen-go-grpc@latest \
+    && export PATH="$PATH:$(go env GOPATH)/bin" \
+    # https://github.com/mattn/go-sqlite3/issues/855
+    # https://github.com/go-gorm/gorm/issues/6468
+    && go env -w CGO_ENABLED=1 \
+    # https://github.com/docker-library/golang/issues/209
+    && apk add git \
+    # ran go build -x server.go and noticed that sqlite3 was taking up a lot of time
+    # https://groups.google.com/g/golang-nuts/c/KexEyiy6PvA
+    && go install github.com/mattn/go-sqlite3@1.14.16 
+	
+    # struggled to get mocks working in v04
+    # && go install github.com/golang/mock/mockgen@latest
+
+# multi-stage build starting in v05
+FROM alpine:3.20.3 AS final
+WORKDIR /home
+COPY --from=base /home/app/server/server .
+COPY --from=base /home/app/client/client .
+
+# once you get the container running...
+# docker exec -it <container name> /bin/sh
+# ./(executable)
+# do this twice, one for client and one for server

@@ -1,0 +1,38 @@
+syntax = "proto3";
+
+option go_package = "sandbox-grpc/api/api";
+option csharp_namespace = "Sandbox.Grpc.Api";
+
+package api;
+
+message GearRequest {
+    string type = 1;
+    string brand = 2;
+    string model = 3;
+    string size = 4;
+    int32 quantity = 5;
+    double length_in_centimeters = 6;
+}
+
+message GearResponse {
+    Gear gear = 1;
+}
+
+message Gear {
+    string guid = 1;
+    string type = 2;
+    int32 quantity = 3;
+}
+
+message WeightRequest {
+    repeated Gear gear = 1;
+}
+
+message WeightResponse {
+    double weight_in_grams = 1;
+}
+
+service GearStorage {
+    rpc GetGear(stream GearRequest) returns (stream GearResponse);
+    rpc GetTotalWeight (WeightRequest) returns (WeightResponse);
+}

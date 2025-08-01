@@ -44,3 +44,16 @@ docker compose up <service_name> -d
   "quantity": <int>
 }
 ```
+
+## To-do
+### Fix database backend for dev service
+This line does not work anymore:
+`go install github.com/mattn/go-sqlite3@1.14.16`
+
+For some reason version `1.14.16` isn't recognized. I noticed version `1.14.24` in `go.sum`, but that does not work either. Installing sqlite is important because it takes a long time to build `server.go` otherwise.
+
+Unless that git repo starts working again in the future, it would be good idea to switch to another database solution.
+
+Thankfully, the prod image still builds.
+
+Would probably not use sqlite with golang moving forward.
